@@ -102,7 +102,7 @@ Assert.IsTrue(isValid);
 Nested properties can also be specified by using "dot" notation:
 ```C#
 var isValid = Validator.Validate(MapPersonViewModel, null, 
-    $"{nameof(MapPersonViewModel.Pets)}.{nameof(MapPetViewModel.Age))");
+    $"{nameof(MapPersonViewModel.Pets)}.{nameof(MapPetViewModel.Age)}");
 
 Assert.IsTrue(isValid);
 ```
