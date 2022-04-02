@@ -90,7 +90,7 @@ var isValid = Validator.Validate(MapPersonViewModel, report);
 Assert.AreEqual("- Age", report[0]);
 ```
 
-Furthermore, if you don't want the Age property to be included in the check, you can explicitly it exclude it by specifying it as a paramter in the 
+Furthermore, if you don't want the Age property to be included in the check, you can explicitly exclude it by specifying it as a parameter in the 
 `Validate` call:
 ```C#
 var isValid = Validator.Validate(MapPersonViewModel, null, 
