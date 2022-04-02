@@ -38,12 +38,12 @@ some properties not being mapped anymore.
 
 ## Here's MappingValidator
 
-MappingValidator does just that: warn you when a class change breaks your manual mapping code. It does this by feeding your mapping code with bogus 
-data compares the outcoome of this mapped bogus data. 
+MappingValidator does just that: warn you when a class change breaks your manual mapping code. It does this by feeding your mapping code with 
+different bogus data for two times and then comparing the outcome of this mapped data.
 
 ## Mapping Expressions
 
-For this to work, your mapping code needs to be in the form of "Expressions". 
+For this to work, your mapping code needs to be in the form of *Expressions*.
 Expressions encapsulate code that can be easily be reused inside other pieces of code or other expressions. 
 Linq relies heavily on expressions and e.g. EntityFramework uses it to convert your C# code into SQL statements.
 
