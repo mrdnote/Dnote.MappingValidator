@@ -1,16 +1,21 @@
 ﻿# Dnote.MappingValidator
 ## Preface
-I don't like AutoMapper, and like many I consider it to have major drawbacks.
+A common task in modern programming is writing mapping code between e.g. an entity object and a model or dto object. Many programmers don't like to 
+write this boring mapping code and resort to libraries that do this mapping automatically for them like the popular [AutoMapper](https://automapper.org/).
+
+Now I'm gonna be upfront. I don't like AutoMapper, and like many I consider it to have major drawbacks.
 Just Google "[don't use automapper](https://www.google.com/search?q=don%27t+use+automapper)", and there are plenty of arguments against it's usage.
 My main argument is that it doesn't fit well with the premise of [Extreme Programming](https://en.wikipedia.org/wiki/Extreme_programming). Extreme 
 Programming heavily relies on tools making it easy to refactor code, and one part of that is being able to lookup referenced class members. However
-class properties that are mapped by AutoMapper are not being referenced at all. So you think a property isn't used anymore, while in fact it still 
+class properties that are mapped by AutoMapper are not being referenced at all. 
+
+Example given: You think a property isn't used anymore, while in fact it still 
 is, but in runtime. Then you go ahead and remove the property, do hours of refactoring, hit run: and BAM, AutoMapper throws you an error (well not 
 throws, it probably logs it somewhere in an obscure place) telling you the property it wants to map no long exists.
 
 ## Alternative
 
-So that's why I like to write out mapping code:
+So that's why I like to write out mapping code, simple, neat and performant:
 ```C#
 PersonViewModel MapPersonViewModel(PersonDto person) 
 {
@@ -28,7 +33,7 @@ BTW, I like to use a Visual Studio extension which takes most of this coding out
 
 ## An AutoMapper advantage
 
-What I do like about AutoMapper is that it has a way (not the most elegent way tho) to tell us when a class is changed in such a way that it causes 
+What I **do** like about AutoMapper is that it has a way (not the most elegent way tho) to tell us when a class is changed in such a way that it causes 
 some properties not being mapped anymore.
 
 ## Here's MappingValidator
