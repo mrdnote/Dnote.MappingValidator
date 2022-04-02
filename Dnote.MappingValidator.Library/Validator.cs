@@ -30,7 +30,7 @@ namespace Dnote.MappingValidator.Library
         //    return changed;
         //}
 
-        public static bool Validate(Expression expression, List<string>? report = null)
+        public static bool Validate(Expression expression, List<string>? report, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -51,7 +51,7 @@ namespace Dnote.MappingValidator.Library
             var output2 = func.DynamicInvoke(input2);
             Debug.Assert(output2 != null);
 
-            CheckIfAllPropertiesAreChanged(output, output2, report, null);
+            CheckIfAllPropertiesAreChanged(output, output2, excludedProperties, report, null);
 
             return !report.Any();
         }
@@ -67,10 +67,11 @@ namespace Dnote.MappingValidator.Library
                 var properties = type.GetProperties().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any());
                 foreach (var property in properties)
                 {
+                    var attribute = property.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
                     var expression = property.GetValue(null) as Expression;
                     Debug.Assert(expression != null);
                     var report = new List<string>();
-                    var validateResult = Validate(expression, report);
+                    var validateResult = Validate(expression, report, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -83,11 +84,17 @@ namespace Dnote.MappingValidator.Library
             return result;
         }
 
-        private static void CheckIfAllPropertiesAreChanged(object output, object output2, List<string> unmappedProperties, string? unmappedPrefix)
+        private static void CheckIfAllPropertiesAreChanged(object output, object output2, IEnumerable<string>? excludedProperties,
+            List<string> unmappedProperties, string? unmappedPrefix)
         {
             Debug.Assert(output.GetType() == output2.GetType());
 
             var properties = output.GetType().GetProperties();
+
+            if (excludedProperties != null)
+            {
+                properties = properties.Where(p => !excludedProperties.Any(pp => pp == Concat(unmappedPrefix, p.Name))).ToArray();
+            }
 
             foreach (var property in properties)
             {
@@ -136,7 +143,8 @@ namespace Dnote.MappingValidator.Library
                             }
                             else
                             {
-                                CheckIfAllPropertiesAreChanged(item1, item2, unmappedProperties, Concat(unmappedPrefix, property.Name));
+                                CheckIfAllPropertiesAreChanged(item1, item2, excludedProperties, unmappedProperties, 
+                                    Concat(unmappedPrefix, property.Name));
                             }
                         }
                     }
@@ -214,7 +222,7 @@ namespace Dnote.MappingValidator.Library
 
         private static object? GetOrCreateAndFillInstance(Type propertyType, bool variant, IDictionary<Type, object> instantiatedObjects, int level)
         {
-            if (level > 10)
+            if (level > 50)
             {
                 return null;
             }

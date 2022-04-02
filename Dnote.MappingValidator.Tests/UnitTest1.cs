@@ -21,7 +21,13 @@ namespace Dnote.MappingValidator.Tests
                     Street = "Kalverstraat",
                     Number = 1
                 },
-                Pets = new List<PetModel>()
+                Pets = new List<PetModel>
+                {
+                    new PetModel
+                    {
+                        Name = "Boris"
+                    }
+                }
             };
 
             var mappingFunc = PersonMapper.PersonModelToPersonViewModel.Compile();
@@ -85,5 +91,24 @@ namespace Dnote.MappingValidator.Tests
             Assert.AreEqual("- Pets.Name", report[6]);
         }
 
+        [TestMethod]
+        public void Expression_validator_works_for_mapping_excluding_last_name()
+        {
+            var report = new List<string>();
+            var isValid = Library.Validator.Validate(PersonMapper.CorrectMappingPersonModelToPersonViewModelExcludingLastName, report, 
+                nameof(PersonViewModel.LastName));
+
+            Assert.IsTrue(isValid);
+        }
+
+        [TestMethod]
+        public void Expression_validator_works_for_mapping_excluding_pet_name()
+        {
+            var report = new List<string>();
+            var isValid = Library.Validator.Validate(PersonMapper.CorrectMappingPersonModelToPersonViewModelExcludingPetName, report,
+                nameof(PersonViewModel.Pets) + "." + nameof(PetViewModel.Name));
+
+            Assert.IsTrue(isValid);
+        }
     }
 }

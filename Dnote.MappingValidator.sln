@@ -5,9 +5,14 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Tests", "Dnote.MappingValidator.Tests\Dnote.MappingValidator.Tests.csproj", "{A365A2DE-331F-487C-B6E7-FC3899E05EBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Main", "Dnote.MappingValidator.Main\Dnote.MappingValidator.Main.csproj", "{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Sample", "Dnote.MappingValidator.Main\Dnote.MappingValidator.Sample.csproj", "{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dnote.MappingValidator.Library", "Dnote.MappingValidator.Library\Dnote.MappingValidator.Library.csproj", "{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Library", "Dnote.MappingValidator.Library\Dnote.MappingValidator.Library.csproj", "{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B669ADD-ADC8-4C7F-981A-42D5774D999D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
