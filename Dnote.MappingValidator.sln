@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Tests", "Dnote.MappingValidator.Tests\Dnote.MappingValidator.Tests.csproj", "{A365A2DE-331F-487C-B6E7-FC3899E05EBF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dnote.MappingValidator.Main", "Dnote.MappingValidator.Main\Dnote.MappingValidator.Main.csproj", "{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dnote.MappingValidator.Library", "Dnote.MappingValidator.Library\Dnote.MappingValidator.Library.csproj", "{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A365A2DE-331F-487C-B6E7-FC3899E05EBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A365A2DE-331F-487C-B6E7-FC3899E05EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A365A2DE-331F-487C-B6E7-FC3899E05EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A365A2DE-331F-487C-B6E7-FC3899E05EBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DC267C2-8F93-4E5B-8828-94A90BEAA9B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB396A19-AFAF-4AF3-94E4-07B1646B4F2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D2BA2475-D3CF-4869-A4E8-7DC50E22D262}
+	EndGlobalSection
+EndGlobal
