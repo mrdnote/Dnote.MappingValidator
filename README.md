@@ -49,7 +49,7 @@ Linq relies heavily on expressions and e.g. EntityFramework uses it to convert y
 
 Example of the mapping we saw before, but in the form of an expression:
 ```C#
-public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
+public static Expression<Func<PersonDto, PersonViewModel>> MapPersonViewModel
 {
     get 
     {
@@ -58,7 +58,7 @@ public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
             FirstName = person.FirstName,
             LastName = person.LastName,
             FullName = person.FirstName + " " + person.LastName
-        }
+        };
     }
 }
 ```
