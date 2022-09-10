@@ -1,4 +1,4 @@
-﻿namespace Dnote.MappingValidator.Main
+﻿namespace Dnote.MappingValidator.Sample
 {
     public class PetModel
     {

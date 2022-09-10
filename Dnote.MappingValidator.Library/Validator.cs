@@ -56,6 +56,41 @@ namespace Dnote.MappingValidator.Library
             return !report.Any();
         }
 
+        public static bool ValidateMethod(Delegate method, List<string>? report, params string[] excludedProperties)
+        {
+            return Validate(method.GetMethodInfo(), report, excludedProperties);
+        }
+
+        public static bool Validate(MethodInfo method, List<string>? report, params string[] excludedProperties)
+        {
+            report ??= new List<string>();
+
+            var sourceType = method.GetParameters()[0].ParameterType;
+            var destType = method.GetParameters()[1].ParameterType;
+
+            var source1 = Activator.CreateInstance(sourceType);
+            Debug.Assert(source1 != null);
+            FillWithSampleValues(source1, false);
+            
+            var dest1 = Activator.CreateInstance(destType);
+            Debug.Assert(dest1 != null);
+            
+            method.Invoke(null, new object[] { source1, dest1 });
+
+            var source2 = Activator.CreateInstance(sourceType);
+            Debug.Assert(source2 != null);
+            FillWithSampleValues(source2, true);
+
+            var dest2 = Activator.CreateInstance(destType);
+            Debug.Assert(dest2 != null);
+
+            method.Invoke(null, new object[] { source2, dest2 });
+
+            CheckIfAllPropertiesAreChanged(dest1, dest2, excludedProperties, report, null);
+
+            return !report.Any();
+        }
+
         public static bool ValidateAssembly(Assembly assembly, List<string>? invalidExpressionReport = null)
         {
             var result = true;
@@ -76,6 +111,20 @@ namespace Dnote.MappingValidator.Library
                     {
                         result = false;
                         invalidExpressionReport?.Add($"{type.FullName}.{property.Name}");
+                        invalidExpressionReport?.AddRange(report);
+                    }
+                }
+
+                var methods = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any());
+                foreach (var method in methods)
+                {
+                    var report = new List<string>();
+                    var attribute = method.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
+                    var validateResult = Validate(method, report, attribute.ExcludedProperties);
+                    if (validateResult == false)
+                    {
+                        result = false;
+                        invalidExpressionReport?.Add($"{type.FullName}.{method.Name}");
                         invalidExpressionReport?.AddRange(report);
                     }
                 }

@@ -1,12 +1,12 @@
-﻿namespace Dnote.MappingValidator.Main
+﻿namespace Dnote.MappingValidator.Sample
 {
     public class PersonModel
     {
         private string _somePropertyThatIsNotUsed = "notused";
 
-        public string SomeWriteOnlyProperty 
-        { 
-            set { } 
+        public string SomeWriteOnlyProperty
+        {
+            set { }
         }
 
         public string? NotUsed { get; set; }

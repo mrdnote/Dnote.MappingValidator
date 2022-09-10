@@ -1,10 +1,11 @@
 ﻿using System.Linq.Expressions;
+
 using Dnote.MappingValidator.Library;
 
-namespace Dnote.MappingValidator.Main
+namespace Dnote.MappingValidator.Sample
 {
     [ValidateMapping]
-    public class PersonMapper
+    public class ExpressionMappings
     {
         [ValidateMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> PersonModelToPersonViewModel
@@ -17,7 +18,7 @@ namespace Dnote.MappingValidator.Main
                     FirstName = a.FirstName,
                     LastName = a.LastName,
                     Street = a.Address != null ? a.Address.Street : null,
-                    Number = a.Address != null ? a.Address.Number: null,
+                    Number = a.Address != null ? a.Address.Number : null,
                     FirstChildName = a.Children != null && a.Children.Any() ? a.Children.First().FullName : null,
                     Pets = a.Pets.Select(p => new PetViewModel
                     {
@@ -37,7 +38,7 @@ namespace Dnote.MappingValidator.Main
                     Id = a.Id,
                     FirstName = a.FirstName,
                     Street = a.Address != null ? a.Address.Street : null,
-                    Number = a.Address != null ? a.Address.Number: null,
+                    Number = a.Address != null ? a.Address.Number : null,
                     FirstChildName = a.Children != null && a.Children.Any() ? a.Children.First().FullName : null,
                     Pets = a.Pets.Select(p => new PetViewModel
                     {
@@ -58,7 +59,7 @@ namespace Dnote.MappingValidator.Main
                     FirstName = a.FirstName,
                     LastName = a.LastName,
                     Street = a.Address != null ? a.Address.Street : null,
-                    Number = a.Address != null ? a.Address.Number: null,
+                    Number = a.Address != null ? a.Address.Number : null,
                     FirstChildName = a.Children != null && a.Children.Any() ? a.Children.First().FullName : null,
                     Pets = a.Pets.Select(p => new PetViewModel
                     {

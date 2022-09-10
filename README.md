@@ -38,38 +38,58 @@ some properties not being mapped anymore.
 
 ## Here's MappingValidator
 
-MappingValidator does just that: warn you when a class change breaks your manual mapping code. It does this by feeding your mapping code with 
-different bogus data for two times and then comparing the outcome of this mapped data.
-
-## Mapping Expressions
-
-For this to work, your mapping code needs to be in the form of *Expressions*.
-Expressions encapsulate code that can be easily be reused inside other pieces of code or other expressions. 
-Linq relies heavily on expressions and e.g. EntityFramework uses it to convert your C# code into SQL statements.
-
-Example of the mapping we saw before, but in the form of an expression:
-```C#
-public static Expression<Func<PersonDto, PersonViewModel>> MapPersonViewModel
-{
-    get 
-    {
-        return person => new PersonViewModel
-        {
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            FullName = person.FirstName + " " + person.LastName
-        };
-    }
-}
-```
-
-## A practical example of validation
-
 Now lets say a property is added to `PersonViewModel` and `PersonDto` named `Age`. If we don't adjust the mapping code, the Age property in the 
 source object of class `PersonDto` will never be set in the target object of class `PersonViewModel`.
 
 MappingValidator to the rescue. It will warn you, or exit your application if you want, when this situation arises. It will even tell you which 
 property is missing in the mapping.
+
+## MappingValidator supports 2 mapping methods
+
+MappingValidator can validate 2 types of mapping methods: Expression mapping and Procedural mapping.
+
+### Expression mapping
+
+Expressions encapsulate code that can be easily be reused inside other pieces of code or other expressions. 
+Linq relies heavily on expressions and e.g. EntityFramework uses it to convert your C# code into SQL statements.
+
+Example of the mapping we saw before, but in the form of an expression:
+```C#
+public class PersonMappers
+{
+    public static Expression<Func<PersonDto, PersonViewModel>> MapPersonViewModel
+    {
+        get 
+        {
+            return person => new PersonViewModel
+            {
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                FullName = person.FirstName + " " + person.LastName
+            };
+        }
+    }
+}
+```
+
+### Procedural mapping
+
+Expressions cannot be used to map data to an existing object. We can do this type op mapping with procedural mapping,
+which simply means that the objects are mapped using a static method:
+```C#
+public class PersonMappers
+{
+    public static void MapPersonViewModel(PersonDto source, PersonViewModel destination)
+    {
+        destination.FirstName = source.FirstName;
+        destination.LastName = source.LastName;
+        destination.FullName = source.FirstName + " " + person.LastName;
+    }
+}
+```
+
+Note that the first 2 parameters of your method must be the source and destination object, in that order.
+You are free to add extra parameters if needed and also have the method return values instead of void.
 
 ## Usage
 
@@ -79,13 +99,13 @@ You can use MappingValidator in two ways. Explicitly or declaratively.
 
 To validate an expression, just pass it to the static `Validator.Validate` method:
 ```C#
-var isValid = Validator.Validate(MapPersonViewModel, null);
+var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null);
 ```
 
 You can pass a string list as the second parameter, which will be filled with information about the properties missing in the mapping:
 ```C#
 var report = new List<string>();
-var isValid = Validator.Validate(MapPersonViewModel, report);
+var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, report);
 
 Assert.AreEqual("- Age", report[0]);
 ```
@@ -93,7 +113,7 @@ Assert.AreEqual("- Age", report[0]);
 Furthermore, if you don't want the Age property to be included in the check, you can explicitly exclude it by specifying it as a parameter in the 
 `Validate` call:
 ```C#
-var isValid = Validator.Validate(MapPersonViewModel, null, 
+var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null, 
     nameof(MapPersonViewModel.Age));
 
 Assert.IsTrue(isValid);
@@ -101,10 +121,15 @@ Assert.IsTrue(isValid);
 
 Nested properties can also be specified by using "dot" notation:
 ```C#
-var isValid = Validator.Validate(MapPersonViewModel, null, 
+var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null, 
     $"{nameof(MapPersonViewModel.Pets)}.{nameof(MapPetViewModel.Age)}");
 
 Assert.IsTrue(isValid);
+```
+
+To validate an procedural mapping, pass it to the static `Validator.ValidateMethod` method:
+```C#
+var isValid = Validator.ValidateMethod(PersonMappers.MapPersonViewModel, null);
 ```
 
 ### Declarative usage
@@ -157,3 +182,15 @@ public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
 {
     // ...
 ```
+
+To declaratively validate a procedural mapping do this:
+```C#
+[ValidateMapping]
+public class PersonMappers
+{
+    [ValidateMapping]
+    public static void MapPersonViewModel(PersonDto source, PersonViewModel destination)
+    // ...
+```
+
+
