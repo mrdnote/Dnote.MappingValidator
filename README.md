@@ -193,4 +193,20 @@ public class PersonMappers
     // ...
 ```
 
+## Tip
+
+Add the following test to you unit test project(s) in order to validate an entire assembly for correct mappings
+(provide declarative mapping validation is used).
+
+```C#
+[Test]
+public void Validators_work_for_assembly()
+{
+    var assembly = Assembly.GetAssembly(typeof(global::MyProject.MyAssembly.SomeClass));
+    Debug.Assert(assembly != null);
+    var report = new List<string>();
+    var isValid = Validator.ValidateAssembly(assembly, report);
+    Assert.IsTrue(isValid);
+}
+```
 
