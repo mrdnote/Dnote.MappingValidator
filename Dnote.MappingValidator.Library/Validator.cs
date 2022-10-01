@@ -30,7 +30,7 @@ namespace Dnote.MappingValidator.Library
         //    return changed;
         //}
 
-        public static bool Validate(Expression expression, List<string>? report, params string[] excludedProperties)
+        public static bool Validate(Expression expression, List<string>? report, bool skipChildObjects = false, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -51,17 +51,17 @@ namespace Dnote.MappingValidator.Library
             var output2 = func.DynamicInvoke(input2);
             Debug.Assert(output2 != null);
 
-            CheckIfAllPropertiesAreChanged(output, output2, excludedProperties, report, null);
+            CheckIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
         }
 
-        public static bool ValidateMethod(Delegate method, List<string>? report, params string[] excludedProperties)
+        public static bool ValidateMethod(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
-            return Validate(method.GetMethodInfo(), report, excludedProperties);
+            return Validate(method.GetMethodInfo(), report, skipChildObjects, excludedProperties);
         }
 
-        public static bool Validate(MethodInfo method, List<string>? report, params string[] excludedProperties)
+        public static bool Validate(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -86,7 +86,7 @@ namespace Dnote.MappingValidator.Library
 
             method.Invoke(null, new object[] { source2, dest2 });
 
-            CheckIfAllPropertiesAreChanged(dest1, dest2, excludedProperties, report, null);
+            CheckIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
         }
@@ -106,7 +106,7 @@ namespace Dnote.MappingValidator.Library
                     var expression = property.GetValue(null) as Expression;
                     Debug.Assert(expression != null);
                     var report = new List<string>();
-                    var validateResult = Validate(expression, report, attribute.ExcludedProperties);
+                    var validateResult = Validate(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -120,7 +120,7 @@ namespace Dnote.MappingValidator.Library
                 {
                     var report = new List<string>();
                     var attribute = method.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
-                    var validateResult = Validate(method, report, attribute.ExcludedProperties);
+                    var validateResult = Validate(method, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -133,8 +133,8 @@ namespace Dnote.MappingValidator.Library
             return result;
         }
 
-        private static void CheckIfAllPropertiesAreChanged(object output, object output2, IEnumerable<string>? excludedProperties,
-            List<string> unmappedProperties, string? unmappedPrefix)
+        private static void CheckIfAllPropertiesAreChanged(object output, object output2, bool skipChildObjects, 
+            IEnumerable<string>? excludedProperties, List<string> unmappedProperties, string? unmappedPrefix)
         {
             Debug.Assert(output.GetType() == output2.GetType());
 
@@ -143,6 +143,11 @@ namespace Dnote.MappingValidator.Library
             if (excludedProperties != null)
             {
                 properties = properties.Where(p => !excludedProperties.Any(pp => pp == Concat(unmappedPrefix, p.Name))).ToArray();
+            }
+
+            if (skipChildObjects)
+            {
+                properties = properties.Where(p => !IsSimple(p.PropertyType)).ToArray();
             }
 
             foreach (var property in properties)
@@ -192,7 +197,7 @@ namespace Dnote.MappingValidator.Library
                             }
                             else
                             {
-                                CheckIfAllPropertiesAreChanged(item1, item2, excludedProperties, unmappedProperties, 
+                                CheckIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties, 
                                     Concat(unmappedPrefix, property.Name));
                             }
                         }
