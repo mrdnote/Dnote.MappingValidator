@@ -9,27 +9,6 @@ namespace Dnote.MappingValidator.Library
 {
     public class Validator
     {
-        //public static bool Validate<TInput, TOutput>(Expression<Func<TInput, TOutput>> expression, List<string>? report = null)
-        //{
-        //    var func = expression.Compile();
-
-        //    var input = Activator.CreateInstance<TInput>();
-        //    Debug.Assert(input != null);
-        //    FillWithSampleValues(input, false);
-        //    var output = func(input);
-        //    Debug.Assert(output != null);
-
-        //    var input2 = Activator.CreateInstance<TInput>();
-        //    Debug.Assert(input2 != null);
-        //    FillWithSampleValues(input2, true);
-        //    var output2 = func(input2);
-        //    Debug.Assert(output2 != null);
-
-        //    var changed = CheckIfAllPropertiesAreChanged(output, output2, report);
-
-        //    return changed;
-        //}
-
         public static bool Validate(Expression expression, List<string>? report, bool skipChildObjects = false, params string[] excludedProperties)
         {
             report ??= new List<string>();

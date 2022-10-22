@@ -5,7 +5,7 @@ using Dnote.MappingValidator.Library;
 namespace Dnote.MappingValidator.Sample
 {
     [ValidateMapping]
-    public class ExpressionMappings
+    public class ExpressionMappers
     {
         [ValidateMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> PersonModelToPersonViewModel
@@ -28,7 +28,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping(nameof(PersonViewModel.LastName))]
+        [ValidateMapping(false, nameof(PersonViewModel.LastName))]
         public static Expression<Func<PersonModel, PersonViewModel>> CorrectMappingPersonModelToPersonViewModelExcludingLastName
         {
             get
@@ -48,7 +48,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping($"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
+        [ValidateMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
         public static Expression<Func<PersonModel, PersonViewModel>> CorrectMappingPersonModelToPersonViewModelExcludingPetName
         {
             get

@@ -5,7 +5,7 @@ using Dnote.MappingValidator.Library;
 namespace Dnote.MappingValidator.Sample
 {
     [ValidateMapping]
-    public class ProceduralMappings
+    public class ProceduralMappers
     {
         [ValidateMapping]
         public static void PersonModelToPersonViewModel(PersonModel source, PersonViewModel destination)
@@ -22,7 +22,7 @@ namespace Dnote.MappingValidator.Sample
             });
         }
 
-        [ValidateMapping(nameof(PersonViewModel.LastName))]
+        [ValidateMapping(false, nameof(PersonViewModel.LastName))]
         public static void CorrectMappingPersonModelToPersonViewModelExcludingLastName(PersonModel source, PersonViewModel destination)
         {
             destination.Id = source.Id;
@@ -36,7 +36,7 @@ namespace Dnote.MappingValidator.Sample
             });
         }
 
-        [ValidateMapping($"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
+        [ValidateMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
         public static void CorrectMappingPersonModelToPersonViewModelExcludingPetName(PersonModel source, PersonViewModel destination)
         {
             destination.Id = source.Id;
