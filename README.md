@@ -72,9 +72,14 @@ public class PersonMappers
 }
 ```
 
+### LinqKit
+
+LinqKit is a .NET library that allows you, amongst many other things, to nest expressions. I'm glad to state that 
+MappingValidator validated nested expressions without any issue.
+
 ### Procedural mapping
 
-Expressions cannot be used to map data to an existing object. We can do this type op mapping with procedural mapping,
+Expressions cannot be used to map data to an existing object. We can do this type of mapping with procedural mapping,
 which simply means that the objects are mapped using a static method:
 ```C#
 public class PersonMappers
