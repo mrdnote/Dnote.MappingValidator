@@ -199,8 +199,6 @@ public class PersonMappers
     // ...
 ```
 
-## Validate Assemblies
-
 Add the following test to you unit test project(s) in order to validate an entire assembly for correct mappings
 (provide declarative mapping validation is used).
 
@@ -213,35 +211,5 @@ public void Validators_work_for_assembly()
     var report = new List<string>();
     var isValid = Validator.ValidateAssembly(assembly, report);
     Assert.IsTrue(isValid);
-}
-```
-
-If you want your mappings to be validated on program startup, you can take the
-following approach in your Program.cs (.NET Core/5/6):
-
-```C#
-public static void Main(string[] args)
-{
-#if DEBUG
-    AppDomain.CurrentDomain.AssemblyLoad += (object? sender, AssemblyLoadEventArgs args) => 
-    {
-        if (args.LoadedAssembly.FullName != null 
-            && !args.LoadedAssembly.FullName.StartsWith("System.") 
-            && !args.LoadedAssembly.FullName.StartsWith("Microsoft."))
-        {
-            var report = new List<string>();
-            if (!Validator.ValidateAssembly(args.LoadedAssembly, report))
-            {
-                Debug.WriteLine("");
-                Debug.WriteLine($"--- Mapping validation errors detected! ----------------------------------------------------------------");
-                report.ForEach(x => Debug.WriteLine(x));
-                Debug.WriteLine($"--------------------------------------------------------------------------------------------------------");
-                Debug.WriteLine("Exiting process...");
-                Environment.Exit(-1);
-            }
-        }
-    };
-#endif
-    // Irrelevant code removed
 }
 ```
