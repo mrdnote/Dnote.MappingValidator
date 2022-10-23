@@ -158,25 +158,27 @@ var isValid = Library.Validator.ValidateAssembly(assembly, report);
 
 A nice way to scan all assemblies of your application, is by scanning them upon load:
 ```C#
-#if DEBUG
-AppDomain.CurrentDomain.AssemblyLoad += (object? sender, AssemblyLoadEventArgs args) => 
+public static void Main(string[] args)
 {
-    if (args.LoadedAssembly.FullName != null 
-        && !args.LoadedAssembly.FullName.StartsWith("System.") 
-        && !args.LoadedAssembly.FullName.StartsWith("Microsoft."))
+#if DEBUG
+    AppDomain.CurrentDomain.AssemblyLoad += (object? sender, AssemblyLoadEventArgs args) => 
     {
-        var report = new List<string>();
-        if (!Validator.ValidateAssembly(args.LoadedAssembly, report))
+        if (args.LoadedAssembly.FullName != null 
+            && !args.LoadedAssembly.FullName.StartsWith("System.") 
+            && !args.LoadedAssembly.FullName.StartsWith("Microsoft."))
         {
-            Debug.WriteLine("");
-            Debug.WriteLine($"--- Mapping validation errors detected! ----------------------------------------------------------------");
-            report.ForEach(x => Debug.WriteLine(x));
-            Debug.WriteLine($"--------------------------------------------------------------------------------------------------------");
-            Debug.WriteLine("Exiting process...");
-            Environment.Exit(-1);
+            var report = new List<string>();
+            if (!Validator.ValidateAssembly(args.LoadedAssembly, report))
+            {
+                Debug.WriteLine("");
+                Debug.WriteLine($"--- Mapping validation errors detected! ----------------------------------------------------------------");
+                report.ForEach(x => Debug.WriteLine(x));
+                Debug.WriteLine($"--------------------------------------------------------------------------------------------------------");
+                Debug.WriteLine("Exiting process...");
+                Environment.Exit(-1);
+            }
         }
-    }
-};
+    };
 #endif
 ```
 
