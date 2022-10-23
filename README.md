@@ -200,7 +200,7 @@ public class PersonMappers
 ```
 
 Add the following test to you unit test project(s) in order to validate an entire assembly for correct mappings
-(provide declarative mapping validation is used).
+(provided declarative mapping validation is used).
 
 ```C#
 [Test]
