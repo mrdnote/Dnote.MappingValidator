@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dnote.MappingValidator.Library\Dnote.MappingValidator.Library.csproj" />
+    <ProjectReference Include="..\Dnote.MappingValidator\Dnote.MappingValidator.csproj" />
   </ItemGroup>
 
 </Project>

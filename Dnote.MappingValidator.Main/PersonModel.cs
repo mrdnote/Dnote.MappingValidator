@@ -2,7 +2,9 @@
 {
     public class PersonModel
     {
+#pragma warning disable CS0414,IDE0051,IDE0044
         private string _somePropertyThatIsNotUsed = "notused";
+#pragma warning restore IDE0044,IDE0051,CS0414
 
         public string SomeWriteOnlyProperty
         {

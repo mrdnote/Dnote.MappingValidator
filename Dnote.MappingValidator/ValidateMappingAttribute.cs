@@ -1,4 +1,6 @@
-﻿namespace Dnote.MappingValidator.Library
+﻿using System;
+
+namespace Dnote.MappingValidator.Library
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
     public class ValidateMappingAttribute : Attribute

@@ -2,9 +2,13 @@
 {
     public class PersonViewModel
     {
+#pragma warning disable CS0414,IDE0051,IDE0044
         private string _somePrivateProperty = "not used";
+#pragma warning restore IDE0044,IDE0051,CS0414
 
-        public string SomeWriteOnlyProperty
+#pragma warning disable CA1822 // Mark members as static
+        public string? SomeWriteOnlyProperty
+#pragma warning restore CA1822 // Mark members as static
         {
             set { }
         }

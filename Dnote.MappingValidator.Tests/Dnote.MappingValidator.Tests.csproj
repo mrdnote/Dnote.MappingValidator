@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dnote.MappingValidator.Library\Dnote.MappingValidator.Library.csproj" />
     <ProjectReference Include="..\Dnote.MappingValidator.Main\Dnote.MappingValidator.Sample.csproj" />
   </ItemGroup>
 

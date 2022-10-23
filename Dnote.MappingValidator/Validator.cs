@@ -1,5 +1,9 @@
-﻿using System.Collections;
+﻿#nullable enable
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -13,22 +17,16 @@ namespace Dnote.MappingValidator.Library
         {
             report ??= new List<string>();
 
-            var lambdaExpression = expression as LambdaExpression;
-            Debug.Assert(lambdaExpression != null);
-
+            var lambdaExpression = expression as LambdaExpression ?? throw new InvalidOperationException();
             var func = lambdaExpression.Compile();
 
-            var input = Activator.CreateInstance(lambdaExpression.Parameters[0].Type);
-            Debug.Assert(input != null);
+            var input = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
             FillWithSampleValues(input, false);
-            var output = func.DynamicInvoke(input);
-            Debug.Assert(output != null);
+            var output = func.DynamicInvoke(input) ?? throw new InvalidOperationException();
 
-            var input2 = Activator.CreateInstance(lambdaExpression.Parameters[0].Type);
-            Debug.Assert(input2 != null);
+            var input2 = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
             FillWithSampleValues(input2, true);
-            var output2 = func.DynamicInvoke(input2);
-            Debug.Assert(output2 != null);
+            var output2 = func.DynamicInvoke(input2) ?? throw new InvalidOperationException();
 
             CheckIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
 
@@ -37,7 +35,8 @@ namespace Dnote.MappingValidator.Library
 
         public static bool ValidateMethod(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
-            return Validate(method.GetMethodInfo(), report, skipChildObjects, excludedProperties);
+            var methodInfo = method.GetMethodInfo() ?? throw new InvalidOperationException();
+            return Validate(methodInfo, report, skipChildObjects, excludedProperties);
         }
 
         public static bool Validate(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
@@ -47,21 +46,17 @@ namespace Dnote.MappingValidator.Library
             var sourceType = method.GetParameters()[0].ParameterType;
             var destType = method.GetParameters()[1].ParameterType;
 
-            var source1 = Activator.CreateInstance(sourceType);
-            Debug.Assert(source1 != null);
+            var source1 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
             FillWithSampleValues(source1, false);
             
-            var dest1 = Activator.CreateInstance(destType);
-            Debug.Assert(dest1 != null);
-            
+            var dest1 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
+
             method.Invoke(null, new object[] { source1, dest1 });
 
-            var source2 = Activator.CreateInstance(sourceType);
-            Debug.Assert(source2 != null);
+            var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
             FillWithSampleValues(source2, true);
 
-            var dest2 = Activator.CreateInstance(destType);
-            Debug.Assert(dest2 != null);
+            var dest2 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
 
             method.Invoke(null, new object[] { source2, dest2 });
 
@@ -82,8 +77,7 @@ namespace Dnote.MappingValidator.Library
                 foreach (var property in properties)
                 {
                     var attribute = property.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
-                    var expression = property.GetValue(null) as Expression;
-                    Debug.Assert(expression != null);
+                    var expression = property.GetValue(null) as Expression ?? throw new InvalidOperationException();
                     var report = new List<string>();
                     var validateResult = Validate(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
@@ -197,7 +191,7 @@ namespace Dnote.MappingValidator.Library
 
         private static void FillWithSampleValues(object inputObject, bool variant, IDictionary<Type, object>? instantiatedObjects = null, int level = 0)
         {
-            Debug.Assert(inputObject != null);
+            _ = inputObject ?? throw new ArgumentNullException(nameof(inputObject));
 
             // Another safety: only instantiate/fill each class type once
             instantiatedObjects ??= new Dictionary<Type, object>();
@@ -265,8 +259,7 @@ namespace Dnote.MappingValidator.Library
                 return instantiatedObjects[propertyType];
             }
 
-            var instance = Activator.CreateInstance(propertyType);
-            Debug.Assert(instance != null);
+            var instance = Activator.CreateInstance(propertyType) ?? throw new InvalidOperationException();
             instantiatedObjects[propertyType] = instance;
             FillWithSampleValues(instance, variant, instantiatedObjects, level + 1);
             return instance;
