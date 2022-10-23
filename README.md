@@ -1,7 +1,8 @@
 ﻿# Dnote.MappingValidator
 ## Preface
-A common task in modern programming is writing mapping code between e.g. an entity object and a model or dto object. Many programmers don't like to 
-write this boring mapping code and resort to libraries that do this mapping automatically for them like the popular [AutoMapper](https://automapper.org/).
+A common task in modern programming is writing mapping code between objects, e.g. between an entity object and a model 
+or dto object. Many programmers don't like to write this boring mapping code and resort to libraries that do this mapping 
+automatically for them like the popular [AutoMapper](https://automapper.org/).
 
 Now I'm gonna be upfront. I don't like AutoMapper, and like many I consider it to have major drawbacks.
 Just Google "[don't use automapper](https://www.google.com/search?q=don%27t+use+automapper)", and there are plenty of arguments against it's usage.
@@ -215,3 +216,32 @@ public void Validators_work_for_assembly()
 }
 ```
 
+If you want your mappings to be validated on program startup, you can take the
+following approach in your Program.cs (.NET Core/5/6):
+
+```C#
+public static void Main(string[] args)
+{
+#if DEBUG
+    AppDomain.CurrentDomain.AssemblyLoad += (object? sender, AssemblyLoadEventArgs args) => 
+    {
+        if (args.LoadedAssembly.FullName != null 
+            && !args.LoadedAssembly.FullName.StartsWith("System.") 
+            && !args.LoadedAssembly.FullName.StartsWith("Microsoft."))
+        {
+            var report = new List<string>();
+            if (!Validator.ValidateAssembly(args.LoadedAssembly, report))
+            {
+                Debug.WriteLine("");
+                Debug.WriteLine($"--- Mapping validation errors detected! ----------------------------------------------------------------");
+                report.ForEach(x => Debug.WriteLine(x));
+                Debug.WriteLine($"--------------------------------------------------------------------------------------------------------");
+                Debug.WriteLine("Exiting process...");
+                Environment.Exit(-1);
+            }
+        }
+    };
+#endif
+    // Irrelevant code removed
+}
+```
