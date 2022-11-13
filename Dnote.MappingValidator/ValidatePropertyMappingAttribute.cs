@@ -2,18 +2,18 @@
 
 namespace Dnote.MappingValidator.Library
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class ValidateMappingAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class ValidatePropertyMappingAttribute : Attribute
     {
         public string[] ExcludedProperties { get; } = Array.Empty<string>();
 
         public bool SkipChildObjects { get; set; }
 
-        public ValidateMappingAttribute()
+        public ValidatePropertyMappingAttribute()
         {
         }
 
-        public ValidateMappingAttribute(bool skipChildObjects = false, params string[] excludedProperties) 
+        public ValidatePropertyMappingAttribute(bool skipChildObjects = false, params string[] excludedProperties) 
             : this()
         {
             SkipChildObjects = skipChildObjects;

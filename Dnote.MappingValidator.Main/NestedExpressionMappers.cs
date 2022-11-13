@@ -9,7 +9,7 @@ namespace Dnote.MappingValidator.Sample
     [ValidateMapping]
     public static class NestedExpressionMappers
     {
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> PersonMapper
         {
             get
@@ -27,7 +27,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PetModel, PetViewModel>> PetMapper
         {
             get

@@ -13,7 +13,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_correct_mapping()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.PersonModelToPersonViewModel, report);
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.PersonModelToPersonViewModel, report);
 
             Assert.IsTrue(isValid);
         }
@@ -22,7 +22,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_nested_mapping()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(NestedExpressionMappers.PersonMapper, report);
+            var isValid = Library.Validator.ValidateExpression(NestedExpressionMappers.PersonMapper, report);
 
             Assert.IsTrue(isValid);
         }
@@ -31,7 +31,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_invalid_nested_mapping()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(InvalidNestedExpressionMappers.PersonMapper, report);
+            var isValid = Library.Validator.ValidateExpression(InvalidNestedExpressionMappers.PersonMapper, report);
 
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, report.Count);
@@ -42,7 +42,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_incorrect_mapping()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.IncorrectPersonModelToPersonViewModel, report);
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.IncorrectPersonModelToPersonViewModel, report);
             Assert.IsFalse(isValid);
             Assert.AreEqual(2, report.Count);
         }
@@ -51,7 +51,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_incorrect_mapped_pets()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.IncorrectPetMappingPersonModelToPersonViewModel, report);
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.IncorrectPetMappingPersonModelToPersonViewModel, report);
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, report.Count);
         }
@@ -60,7 +60,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_incorrect_mapped_pet_name()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.IncorrectPetNameMappingPersonModelToPersonViewModel, report);
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.IncorrectPetNameMappingPersonModelToPersonViewModel, report);
             Assert.IsFalse(isValid);
             Assert.AreEqual(1, report.Count);
             Assert.AreEqual("- Pets.Name", report[0]);
@@ -70,7 +70,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_mapping_excluding_last_name()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.CorrectMappingPersonModelToPersonViewModelExcludingLastName, report,
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.CorrectMappingPersonModelToPersonViewModelExcludingLastName, report,
                 false, nameof(PersonViewModel.LastName));
 
             Assert.IsTrue(isValid);
@@ -80,7 +80,7 @@ namespace Dnote.MappingValidator.Tests
         public void Expression_validator_works_for_mapping_excluding_pet_name()
         {
             var report = new List<string>();
-            var isValid = Library.Validator.Validate(ExpressionMappers.CorrectMappingPersonModelToPersonViewModelExcludingPetName, report,
+            var isValid = Library.Validator.ValidateExpression(ExpressionMappers.CorrectMappingPersonModelToPersonViewModelExcludingPetName, report,
                 false, nameof(PersonViewModel.Pets) + "." + nameof(PetViewModel.Name));
 
             Assert.IsTrue(isValid);

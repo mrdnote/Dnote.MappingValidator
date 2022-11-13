@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Xml.Schema;
 
 // TODO: if the target of a mapped class gets a new property, validation will still succeed. Find out a way to check this change too.
 
@@ -13,7 +14,7 @@ namespace Dnote.MappingValidator.Library
 {
     public class Validator
     {
-        public static bool Validate(Expression expression, List<string>? report, bool skipChildObjects = false, params string[] excludedProperties)
+        public static bool ValidateExpression(Expression expression, List<string>? report, bool skipChildObjects = false, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -33,32 +34,81 @@ namespace Dnote.MappingValidator.Library
             return !report.Any();
         }
 
-        public static bool ValidateMethod(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        public static bool ValidateProcedure(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             var methodInfo = method.GetMethodInfo() ?? throw new InvalidOperationException();
-            return Validate(methodInfo, report, skipChildObjects, excludedProperties);
+            return ValidateProcedure(methodInfo, report, skipChildObjects, excludedProperties);
         }
 
-        public static bool Validate(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        private static bool ValidateProcedure(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
-            var sourceType = method.GetParameters()[0].ParameterType;
-            var destType = method.GetParameters()[1].ParameterType;
+            var parameters = method.GetParameters();
+            var sourceType = parameters[0].ParameterType;
+            var destType = parameters[1].ParameterType;
 
             var source1 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
             FillWithSampleValues(source1, false);
             
             var dest1 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
 
-            method.Invoke(null, new object[] { source1, dest1 });
+            var paramList1 = new List<object?> { source1, dest1 };
+            for (int i = 2; i < parameters.Count(); i++)
+            {
+                paramList1.Add(null);
+            }
+            method.Invoke(null, paramList1.ToArray());
 
             var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
             FillWithSampleValues(source2, true);
 
             var dest2 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
 
-            method.Invoke(null, new object[] { source2, dest2 });
+            var paramList2 = new List<object?> { source2, dest2 };
+            for (int i = 2; i < parameters.Count(); i++)
+            {
+                paramList2.Add(null);
+            }
+            method.Invoke(null, paramList2.ToArray());
+
+            CheckIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
+
+            return !report.Any();
+        }        
+        
+        public static bool ValidateFunction(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        {
+            var methodInfo = method.GetMethodInfo() ?? throw new InvalidOperationException();
+            return ValidateFunction(methodInfo, report, skipChildObjects, excludedProperties);
+        }
+
+        private static bool ValidateFunction(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        {
+            report ??= new List<string>();
+
+            var parameters = method.GetParameters();
+            var sourceType = parameters[0].ParameterType;
+
+            var source1 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
+            FillWithSampleValues(source1, false);
+
+            var paramList1 = new List<object?> { source1 };
+            for (int i = 1; i < parameters.Count(); i++)
+            {
+                paramList1.Add(null);
+            }
+            var dest1 = method.Invoke(null, paramList1.ToArray()) ?? throw new InvalidOperationException();
+
+            var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
+            FillWithSampleValues(source2, true);
+
+            var paramList2 = new List<object?> { source2 };
+            for (int i = 1; i < parameters.Count(); i++)
+            {
+                paramList2.Add(null);
+            }
+            var dest2 = method.Invoke(null, paramList2.ToArray()) ?? throw new InvalidOperationException();
 
             CheckIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
 
@@ -73,13 +123,13 @@ namespace Dnote.MappingValidator.Library
 
             foreach (var type in types)
             {
-                var properties = type.GetProperties().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any());
+                var properties = type.GetProperties().Where(t => t.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().Any());
                 foreach (var property in properties)
                 {
-                    var attribute = property.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
+                    var attribute = property.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().First();
                     var expression = property.GetValue(null) as Expression ?? throw new InvalidOperationException();
                     var report = new List<string>();
-                    var validateResult = Validate(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                    var validateResult = ValidateExpression(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -88,12 +138,12 @@ namespace Dnote.MappingValidator.Library
                     }
                 }
 
-                var methods = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any());
+                var methods = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateProcedureMappingAttribute>().Any());
                 foreach (var method in methods)
                 {
                     var report = new List<string>();
-                    var attribute = method.GetCustomAttributes().OfType<ValidateMappingAttribute>().First();
-                    var validateResult = Validate(method, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                    var attribute = method.GetCustomAttributes().OfType<ValidateProcedureMappingAttribute>().First();
+                    var validateResult = ValidateProcedure(method, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;

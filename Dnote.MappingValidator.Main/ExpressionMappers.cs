@@ -7,7 +7,7 @@ namespace Dnote.MappingValidator.Sample
     [ValidateMapping]
     public class ExpressionMappers
     {
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> PersonModelToPersonViewModel
         {
             get
@@ -28,7 +28,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping(false, nameof(PersonViewModel.LastName))]
+        [ValidatePropertyMapping(false, nameof(PersonViewModel.LastName))]
         public static Expression<Func<PersonModel, PersonViewModel>> CorrectMappingPersonModelToPersonViewModelExcludingLastName
         {
             get
@@ -48,7 +48,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
+        [ValidatePropertyMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
         public static Expression<Func<PersonModel, PersonViewModel>> CorrectMappingPersonModelToPersonViewModelExcludingPetName
         {
             get
@@ -69,7 +69,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> IncorrectPersonModelToPersonViewModel
         {
             get
@@ -88,7 +88,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> IncorrectPetMappingPersonModelToPersonViewModel
         {
             get
@@ -105,7 +105,7 @@ namespace Dnote.MappingValidator.Sample
             }
         }
 
-        [ValidateMapping]
+        [ValidatePropertyMapping]
         public static Expression<Func<PersonModel, PersonViewModel>> IncorrectPetNameMappingPersonModelToPersonViewModel
         {
             get

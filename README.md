@@ -95,7 +95,29 @@ public class PersonMappers
 ```
 
 Note that the first 2 parameters of your method must be the source and destination object, in that order.
-You are free to add extra parameters if needed and also have the method return values instead of void.
+You are free to add extra parameters (which must be nullable) if needed and also have the method return values 
+instead of void.
+
+### Functional mapping
+
+Mapping can also be done by creating the target object and returning it from a method:
+```C#
+public class PersonMappers
+{
+    public static PersonViewModel MapPersonViewModel(PersonDto source)
+    {
+        return new PersonViewModel 
+        {
+            FirstName = source.FirstName,
+            LastName = source.LastName,
+            FullName = source.FirstName + " " + person.LastName
+        };
+    }
+}
+```
+
+Note that the first 1 parameters of your method must be the source object.
+You are free to add extra parameters (which must be nullable) if needed.
 
 ## Usage
 
@@ -105,13 +127,13 @@ You can use MappingValidator in two ways. Explicitly or declaratively.
 
 To validate an expression, just pass it to the static `Validator.Validate` method:
 ```C#
-var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null);
+var isValid = Validator.ValidateExpression(PersonMappers.MapPersonViewModel, null);
 ```
 
 You can pass a string list as the second parameter, which will be filled with information about the properties missing in the mapping:
 ```C#
 var report = new List<string>();
-var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, report);
+var isValid = Validator.ValidateExpression(PersonMappers.MapPersonViewModel, report);
 
 Assert.AreEqual("- Age", report[0]);
 ```
@@ -119,7 +141,7 @@ Assert.AreEqual("- Age", report[0]);
 Furthermore, if you don't want the Age property to be included in the check, you can explicitly exclude it by specifying it as a parameter in the 
 `Validate` call:
 ```C#
-var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null, 
+var isValid = Validator.ValidateExpression(PersonMappers.MapPersonViewModel, null, 
     nameof(MapPersonViewModel.Age));
 
 Assert.IsTrue(isValid);
@@ -127,15 +149,20 @@ Assert.IsTrue(isValid);
 
 Nested properties can also be specified by using "dot" notation:
 ```C#
-var isValid = Validator.Validate(PersonMappers.MapPersonViewModel, null, 
+var isValid = Validator.ValidateExpression(PersonMappers.MapPersonViewModel, null, 
     $"{nameof(MapPersonViewModel.Pets)}.{nameof(MapPetViewModel.Age)}");
 
 Assert.IsTrue(isValid);
 ```
 
-To validate an procedural mapping, pass it to the static `Validator.ValidateMethod` method:
+To validate a procedure mapping, pass it to the static `Validator.ValidateProcedure` method:
 ```C#
-var isValid = Validator.ValidateMethod(PersonMappers.MapPersonViewModel, null);
+var isValid = Validator.ValidateProcedure(PersonMappers.MapPersonViewModel, null);
+```
+
+To validate a function mapping, pass it to the static `Validator.ValidateFunction` method:
+```C#
+var isValid = Validator.ValidateFunction(PersonMappers.MapPersonViewModel, null);
 ```
 
 ### Declarative usage
@@ -146,7 +173,7 @@ You also need to decorate the class the expression is part of! Like this:
 [ValidateMapping]
 public class PersonMappers
 {
-    [ValidateMapping]
+    [ValidatePropertyMapping]
     public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
     // ...
 ```
@@ -185,7 +212,7 @@ public static void Main(string[] args)
 When validating mappings in this declarative way, it's also possible to skip certain properties, just like we did before. We do this by specifying 
 them as parameters of the `ValidateMapping` attribute:
 ```C#
-[ValidateMapping(nameof(MapPersonViewModel.Age))]
+[ValidatePropertyMapping(nameof(MapPersonViewModel.Age))]
 public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
 {
     // ...
@@ -196,8 +223,18 @@ To declaratively validate a procedural mapping do this:
 [ValidateMapping]
 public class PersonMappers
 {
-    [ValidateMapping]
+    [ValidateProcedureMapping]
     public static void MapPersonViewModel(PersonDto source, PersonViewModel destination)
+    // ...
+```
+
+To declaratively validate a function mapping do this:
+```C#
+[ValidateMapping]
+public class PersonMappers
+{
+    [ValidateFunctionMapping]
+    public static PersonViewModel MapPersonViewModel(PersonDto source)
     // ...
 ```
 
