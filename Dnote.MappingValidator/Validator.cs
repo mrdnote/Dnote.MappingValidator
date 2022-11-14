@@ -119,7 +119,7 @@ namespace Dnote.MappingValidator.Library
         {
             var result = true;
 
-            var types = assembly.GetTypes().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any());
+            var types = assembly.GetTypes().Where(t => t.GetCustomAttributes().OfType<ValidateMappingAttribute>().Any()).ToList();
 
             foreach (var type in types)
             {
@@ -148,6 +148,20 @@ namespace Dnote.MappingValidator.Library
                     {
                         result = false;
                         invalidExpressionReport?.Add($"{type.FullName}.{method.Name}");
+                        invalidExpressionReport?.AddRange(report);
+                    }
+                }
+
+                var functions = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().Any());
+                foreach (var function in functions)
+                {
+                    var report = new List<string>();
+                    var attribute = function.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().First();
+                    var validateResult = ValidateFunction(function, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                    if (validateResult == false)
+                    {
+                        result = false;
+                        invalidExpressionReport?.Add($"{type.FullName}.{function.Name}");
                         invalidExpressionReport?.AddRange(report);
                     }
                 }
