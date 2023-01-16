@@ -19,7 +19,7 @@ namespace Dnote.MappingValidator.Tests
             var report = new List<string>();
             var isValid = Library.Validator.ValidateAssembly(assembly, report);
             Assert.IsFalse(isValid);
-            Assert.AreEqual(18, report.Count);
+            Assert.AreEqual(25, report.Count);
 
             var idx = report.IndexOf("Dnote.MappingValidator.Sample.ExpressionMappers.IncorrectPersonModelToPersonViewModel");
             Assert.AreNotEqual(-1, idx);

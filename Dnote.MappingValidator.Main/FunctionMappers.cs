@@ -43,7 +43,7 @@ namespace Dnote.MappingValidator.Sample
             };
         }
 
-        [ValidateFunctionMapping(false, nameof(PersonViewModel.LastName))]
+        [ValidateProcedureMapping(false, nameof(PersonViewModel.LastName))]
         public static void CorrectMappingPersonModelToPersonViewModelExcludingLastName(PersonModel source, PersonViewModel destination)
         {
             destination.Id = source.Id;
@@ -57,7 +57,7 @@ namespace Dnote.MappingValidator.Sample
             });
         }
 
-        [ValidateFunctionMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
+        [ValidateProcedureMapping(false, $"{nameof(PersonViewModel.Pets)}.{nameof(PetViewModel.Name)}")]
         public static void CorrectMappingPersonModelToPersonViewModelExcludingPetName(PersonModel source, PersonViewModel destination)
         {
             destination.Id = source.Id;

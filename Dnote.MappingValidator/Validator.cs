@@ -347,13 +347,49 @@ namespace Dnote.MappingValidator.Library
             {
                 value = variant;
             }
-            else if (propertyType == typeof(int))
+            else if (propertyType == typeof(char))
+            {
+                value = variant ? 'a' : 'b';
+            }
+            else if (propertyType == typeof(sbyte))
+            {
+                value = variant ? 12 : 45;
+            }
+            else if (propertyType == typeof(byte))
             {
                 value = variant ? 123 : 456;
             }
-            else if (propertyType == typeof(double))
+            else if (propertyType == typeof(short))
+            {
+                value = variant ? 1 : -4;
+            }
+            else if (propertyType == typeof(ushort))
+            {
+                value = variant ? 1 : 4;
+            }
+            else if (propertyType == typeof(int))
+            {
+                value = variant ? 1234 : -4567;
+            }
+            else if (propertyType == typeof(uint))
+            {
+                value = variant ? 1234 : 4567;
+            }
+            else if (propertyType == typeof(long))
+            {
+                value = variant ? 12345 : -45678;
+            }
+            else if (propertyType == typeof(ulong))
+            {
+                value = variant ? 12345 : 45678;
+            }
+            else if (propertyType == typeof(float))
             {
                 value = variant ? 23.45 : 678.999;
+            }
+            else if (propertyType == typeof(double))
+            {
+                value = variant ? 23.456 : 678.9999;
             }
             else if (propertyType == typeof(DateTime))
             {
