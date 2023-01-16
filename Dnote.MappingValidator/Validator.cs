@@ -377,15 +377,15 @@ namespace Dnote.MappingValidator.Library
             }
             else if (propertyType == typeof(long))
             {
-                value = variant ? 12345 : -45678;
+                value = variant ? 12345L : -45678L;
             }
             else if (propertyType == typeof(ulong))
             {
-                value = variant ? 12345 : 45678;
+                value = variant ? 12345L : 45678L;
             }
             else if (propertyType == typeof(float))
             {
-                value = variant ? 23.45 : 678.999;
+                value = variant ? 23.45F : 678.999F;
             }
             else if (propertyType == typeof(double))
             {
