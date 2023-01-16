@@ -184,7 +184,7 @@ namespace Dnote.MappingValidator.Library
 
             if (skipChildObjects)
             {
-                properties = properties.Where(p => !IsSimple(p.PropertyType)).ToArray();
+                properties = properties.Where(p => IsSimple(p.PropertyType)).ToArray();
             }
 
             foreach (var property in properties)
