@@ -123,7 +123,7 @@ namespace Dnote.MappingValidator.Library
 
             foreach (var type in types)
             {
-                var properties = type.GetProperties().Where(t => t.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().Any());
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Where(t => t.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().Any());
                 foreach (var property in properties)
                 {
                     var attribute = property.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().First();
@@ -138,7 +138,7 @@ namespace Dnote.MappingValidator.Library
                     }
                 }
 
-                var methods = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateProcedureMappingAttribute>().Any());
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Where(t => t.GetCustomAttributes().OfType<ValidateProcedureMappingAttribute>().Any());
                 foreach (var method in methods)
                 {
                     var report = new List<string>();
@@ -152,7 +152,7 @@ namespace Dnote.MappingValidator.Library
                     }
                 }
 
-                var functions = type.GetMethods().Where(t => t.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().Any());
+                var functions = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Where(t => t.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().Any());
                 foreach (var function in functions)
                 {
                     var report = new List<string>();
