@@ -189,7 +189,7 @@ namespace Dnote.MappingValidator.Library
 
             foreach (var property in properties)
             {
-                if (property.CanRead)
+                if (property.CanRead && property.CanWrite)
                 {
                     var propertyResult = true;
 
