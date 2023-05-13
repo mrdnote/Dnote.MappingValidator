@@ -1,12 +1,10 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Xml.Schema;
 
 // TODO: if the target of a mapped class gets a new property, validation will still succeed. Find out a way to check this change too.
 
@@ -22,14 +20,14 @@ namespace Dnote.MappingValidator.Library
             var func = lambdaExpression.Compile();
 
             var input = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
-            FillWithSampleValues(input, false);
+            fillWithSampleValues(input, excludedProperties, null, false);
             var output = func.DynamicInvoke(input) ?? throw new InvalidOperationException();
 
             var input2 = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
-            FillWithSampleValues(input2, true);
+            fillWithSampleValues(input2, excludedProperties, null, true);
             var output2 = func.DynamicInvoke(input2) ?? throw new InvalidOperationException();
 
-            CheckIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
         }
@@ -37,10 +35,10 @@ namespace Dnote.MappingValidator.Library
         public static bool ValidateProcedure(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             var methodInfo = method.GetMethodInfo() ?? throw new InvalidOperationException();
-            return ValidateProcedure(methodInfo, report, skipChildObjects, excludedProperties);
+            return validateProcedure(methodInfo, report, skipChildObjects, excludedProperties);
         }
 
-        private static bool ValidateProcedure(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        private static bool validateProcedure(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -49,7 +47,7 @@ namespace Dnote.MappingValidator.Library
             var destType = parameters[1].ParameterType;
 
             var source1 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
-            FillWithSampleValues(source1, false);
+            fillWithSampleValues(source1, excludedProperties, null, false);
             
             var dest1 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
 
@@ -61,7 +59,7 @@ namespace Dnote.MappingValidator.Library
             method.Invoke(null, paramList1.ToArray());
 
             var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
-            FillWithSampleValues(source2, true);
+            fillWithSampleValues(source2, excludedProperties, null, true);
 
             var dest2 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
 
@@ -72,7 +70,7 @@ namespace Dnote.MappingValidator.Library
             }
             method.Invoke(null, paramList2.ToArray());
 
-            CheckIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
         }        
@@ -80,10 +78,10 @@ namespace Dnote.MappingValidator.Library
         public static bool ValidateFunction(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             var methodInfo = method.GetMethodInfo() ?? throw new InvalidOperationException();
-            return ValidateFunction(methodInfo, report, skipChildObjects, excludedProperties);
+            return validateFunction(methodInfo, report, skipChildObjects, excludedProperties);
         }
 
-        private static bool ValidateFunction(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
+        private static bool validateFunction(MethodInfo method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
         {
             report ??= new List<string>();
 
@@ -91,7 +89,7 @@ namespace Dnote.MappingValidator.Library
             var sourceType = parameters[0].ParameterType;
 
             var source1 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
-            FillWithSampleValues(source1, false);
+            fillWithSampleValues(source1, excludedProperties, null, false);
 
             var paramList1 = new List<object?> { source1 };
             for (int i = 1; i < parameters.Count(); i++)
@@ -101,7 +99,7 @@ namespace Dnote.MappingValidator.Library
             var dest1 = method.Invoke(null, paramList1.ToArray()) ?? throw new InvalidOperationException();
 
             var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
-            FillWithSampleValues(source2, true);
+            fillWithSampleValues(source2, excludedProperties, null, true);
 
             var paramList2 = new List<object?> { source2 };
             for (int i = 1; i < parameters.Count(); i++)
@@ -110,7 +108,7 @@ namespace Dnote.MappingValidator.Library
             }
             var dest2 = method.Invoke(null, paramList2.ToArray()) ?? throw new InvalidOperationException();
 
-            CheckIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
         }
@@ -143,7 +141,7 @@ namespace Dnote.MappingValidator.Library
                 {
                     var report = new List<string>();
                     var attribute = method.GetCustomAttributes().OfType<ValidateProcedureMappingAttribute>().First();
-                    var validateResult = ValidateProcedure(method, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                    var validateResult = validateProcedure(method, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -157,7 +155,7 @@ namespace Dnote.MappingValidator.Library
                 {
                     var report = new List<string>();
                     var attribute = function.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().First();
-                    var validateResult = ValidateFunction(function, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                    var validateResult = validateFunction(function, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
                     if (validateResult == false)
                     {
                         result = false;
@@ -170,7 +168,7 @@ namespace Dnote.MappingValidator.Library
             return result;
         }
 
-        private static void CheckIfAllPropertiesAreChanged(object output, object output2, bool skipChildObjects, 
+        private static void checkIfAllPropertiesAreChanged(object output, object output2, bool skipChildObjects, 
             IEnumerable<string>? excludedProperties, List<string> unmappedProperties, string? unmappedPrefix)
         {
             Debug.Assert(output.GetType() == output2.GetType());
@@ -179,12 +177,12 @@ namespace Dnote.MappingValidator.Library
 
             if (excludedProperties != null)
             {
-                properties = properties.Where(p => !excludedProperties.Any(pp => pp == Concat(unmappedPrefix, p.Name))).ToArray();
+                properties = properties.Where(p => !excludedProperties.Any(pp => pp == concat(unmappedPrefix, p.Name))).ToArray();
             }
 
             if (skipChildObjects)
             {
-                properties = properties.Where(p => IsSimple(p.PropertyType)).ToArray();
+                properties = properties.Where(p => isSimple(p.PropertyType)).ToArray();
             }
 
             foreach (var property in properties)
@@ -211,13 +209,13 @@ namespace Dnote.MappingValidator.Library
 
                     if (!propertyResult)
                     {
-                        unmappedProperties.Add($"- {Concat(unmappedPrefix, property.Name)}");
+                        unmappedProperties.Add($"- {concat(unmappedPrefix, property.Name)}");
                     }
 
                     // If we already established the props are not the same, not need to traverse children
                     if (propertyResult) 
                     {
-                        if (IsList(property.PropertyType))
+                        if (isList(property.PropertyType))
                         {
                             var list1 = value1 as IEnumerable ?? throw new InvalidOperationException();
                             var list2 = value2 as IEnumerable ?? throw new InvalidOperationException();
@@ -230,12 +228,12 @@ namespace Dnote.MappingValidator.Library
 
                             if (item1 == null || item2 == null)
                             {
-                                unmappedProperties.Add($"- {Concat(unmappedPrefix, property.Name)}");
+                                unmappedProperties.Add($"- {concat(unmappedPrefix, property.Name)}");
                             }
                             else
                             {
-                                CheckIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties, 
-                                    Concat(unmappedPrefix, property.Name));
+                                checkIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties, 
+                                    concat(unmappedPrefix, property.Name));
                             }
                         }
                     }
@@ -243,7 +241,7 @@ namespace Dnote.MappingValidator.Library
             }
         }
 
-        private static string Concat(string? s1, string s2)
+        private static string concat(string? s1, string s2)
         {
             if (string.IsNullOrEmpty(s1))
             {
@@ -253,7 +251,8 @@ namespace Dnote.MappingValidator.Library
             return $"{s1}.{s2}";
         }
 
-        private static void FillWithSampleValues(object inputObject, bool variant, IDictionary<Type, object>? instantiatedObjects = null, int level = 0)
+        private static void fillWithSampleValues(object inputObject, IEnumerable<string>? excludedProperties, string? unmappedPrefix, bool variant, 
+            IDictionary<Type, object>? instantiatedObjects = null, int level = 0)
         {
             _ = inputObject ?? throw new ArgumentNullException(nameof(inputObject));
 
@@ -262,17 +261,22 @@ namespace Dnote.MappingValidator.Library
 
             var properties = inputObject.GetType().GetProperties();
 
+            if (excludedProperties != null)
+            {
+                properties = properties.Where(p => !excludedProperties.Any(pp => pp == concat(unmappedPrefix, p.Name))).ToArray();
+            }
+
             foreach (var property in properties)
             {
                 var canWrite = property.CanWrite;
-                if (IsSimple(property.PropertyType))
+                if (isSimple(property.PropertyType))
                 {
                     if (canWrite)
                     {
-                        FillProperty(property, inputObject, variant);
+                        fillProperty(property, inputObject, variant);
                     }
                 }
-                else if (IsList(property.PropertyType))
+                else if (isList(property.PropertyType))
                 {
                     var isGenericList = property.PropertyType.GenericTypeArguments.Length == 1;
                     if (isGenericList && canWrite)
@@ -283,7 +287,8 @@ namespace Dnote.MappingValidator.Library
                         var list = (Activator.CreateInstance(constructedListType) as IList) ?? throw new InvalidOperationException();
                         property.SetValue(inputObject, list);
 
-                        var listElement = GetOrCreateAndFillInstance(itemType, variant, instantiatedObjects, level);
+                        var listElement = getOrCreateAndFillInstance(itemType, excludedProperties, concat(unmappedPrefix, property.Name), variant, 
+                            instantiatedObjects, level);
 
                         if (listElement != null)
                         {
@@ -299,7 +304,8 @@ namespace Dnote.MappingValidator.Library
                     {
                         if (childObject == null)
                         {
-                            childObject = GetOrCreateAndFillInstance(property.PropertyType, variant, instantiatedObjects, level);
+                            childObject = getOrCreateAndFillInstance(property.PropertyType, excludedProperties, concat(unmappedPrefix, property.Name), 
+                                variant, instantiatedObjects, level);
                             property.SetValue(inputObject, childObject);
                         }
                         else
@@ -311,7 +317,8 @@ namespace Dnote.MappingValidator.Library
             }
         }
 
-        private static object? GetOrCreateAndFillInstance(Type propertyType, bool variant, IDictionary<Type, object> instantiatedObjects, int level)
+        private static object? getOrCreateAndFillInstance(Type propertyType, IEnumerable<string>? excludedProperties, string? unmappedPrefix, 
+            bool variant, IDictionary<Type, object> instantiatedObjects, int level)
         {
             if (level > 50)
             {
@@ -325,11 +332,11 @@ namespace Dnote.MappingValidator.Library
 
             var instance = Activator.CreateInstance(propertyType) ?? throw new InvalidOperationException();
             instantiatedObjects[propertyType] = instance;
-            FillWithSampleValues(instance, variant, instantiatedObjects, level + 1);
+            fillWithSampleValues(instance, excludedProperties, unmappedPrefix, variant, instantiatedObjects, level + 1);
             return instance;
         }
 
-        private static void FillProperty(PropertyInfo property, object instance, bool variant)
+        private static void fillProperty(PropertyInfo property, object instance, bool variant)
         {
             object? value;
             var propertyType = property.PropertyType;
@@ -414,13 +421,13 @@ namespace Dnote.MappingValidator.Library
             property.SetValue(instance, value);
         }
 
-        private static bool IsSimple(Type type)
+        private static bool isSimple(Type type)
         {
             var typeInfo = type.GetTypeInfo();
             if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 // nullable type, check if the nested type is simple.
-                return IsSimple(typeInfo.GetGenericArguments()[0]);
+                return isSimple(typeInfo.GetGenericArguments()[0]);
             }
             return typeInfo.IsPrimitive
               || typeInfo.IsEnum
@@ -431,7 +438,7 @@ namespace Dnote.MappingValidator.Library
               || type.Equals(typeof(decimal));
         }
 
-        private static bool IsList(Type type)
+        private static bool isList(Type type)
         {
             return type != typeof(string) && type.GetInterfaces().Contains(typeof(IEnumerable));
         }
