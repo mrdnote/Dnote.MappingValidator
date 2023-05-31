@@ -251,6 +251,14 @@ namespace Dnote.MappingValidator.Library
             return $"{s1}.{s2}";
         }
 
+        /// <summary>
+        /// Handy utility function to fill an object with sample values.
+        /// </summary>
+        public static void FillWithSampleValues(object inputObject, IEnumerable<string>? excludedProperties)
+        {
+            fillWithSampleValues(inputObject, excludedProperties, null, false, null, 0);
+        }
+
         private static void fillWithSampleValues(object inputObject, IEnumerable<string>? excludedProperties, string? unmappedPrefix, bool variant, 
             IDictionary<Type, object>? instantiatedObjects = null, int level = 0)
         {
