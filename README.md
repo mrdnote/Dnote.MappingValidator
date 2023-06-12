@@ -45,9 +45,9 @@ source object of class `PersonDto` will never be set in the target object of cla
 MappingValidator to the rescue. It will warn you, or exit your application if you want, when this situation arises. It will even tell you which 
 property is missing in the mapping.
 
-## MappingValidator supports 2 mapping methods
+## MappingValidator supports 3 mapping methods
 
-MappingValidator can validate 2 types of mapping methods: Expression mapping and Procedural mapping.
+MappingValidator can validate 3 types of mapping methods: Expression mapping, Procedural mapping and Functional mapping.
 
 ### Expression mapping
 
