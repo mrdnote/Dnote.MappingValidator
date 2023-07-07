@@ -422,6 +422,10 @@ namespace Dnote.MappingValidator.Library
             {
                 value = variant ? Enum.GetValues(propertyType).GetValue(0) : Enum.GetValues(propertyType).GetValue(1);
             }
+            else if (propertyType == typeof(Uri))
+            {
+                value = variant ? new Uri("http://abc.com") : new Uri("http://xyz.com");
+            }
             else
             {
                 throw new InvalidOperationException();
@@ -442,6 +446,7 @@ namespace Dnote.MappingValidator.Library
               || type.Equals(typeof(DateTime))
               || type.Equals(typeof(DateTimeOffset))
               || type.Equals(typeof(Guid))
+              || type.Equals(typeof(Uri))
               || type.Equals(typeof(string))
               || type.Equals(typeof(decimal));
         }
