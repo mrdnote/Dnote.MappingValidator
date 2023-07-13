@@ -295,12 +295,19 @@ namespace Dnote.MappingValidator.Library
                         var list = (Activator.CreateInstance(constructedListType) as IList) ?? throw new InvalidOperationException();
                         property.SetValue(inputObject, list);
 
-                        var listElement = getOrCreateAndFillInstance(itemType, excludedProperties, concat(unmappedPrefix, property.Name), variant, 
-                            instantiatedObjects, level);
-
-                        if (listElement != null)
+                        if (isSimple(itemType))
                         {
+                            var listElement = getSimpleSampleValue(itemType, variant);
                             list.Add(listElement);
+                        }
+                        else
+                        {
+                            var listElement = getOrCreateAndFillInstance(itemType, excludedProperties, concat(unmappedPrefix, property.Name), variant,
+                                instantiatedObjects, level);
+                            if (listElement != null)
+                            {
+                                list.Add(listElement);
+                            }
                         }
                     }
                 }
@@ -346,91 +353,94 @@ namespace Dnote.MappingValidator.Library
 
         private static void fillProperty(PropertyInfo property, object instance, bool variant)
         {
-            object? value;
-            var propertyType = property.PropertyType;
+            var value = getSimpleSampleValue(property.PropertyType, variant);
 
-            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            property.SetValue(instance, value);
+        }
+
+        private static object? getSimpleSampleValue(Type type, bool variant)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                propertyType = propertyType.GetGenericArguments()[0];
+                type = type.GetGenericArguments()[0];
             }
 
-            if (propertyType == typeof(string))
+            if (type == typeof(string))
             {
-                value = variant ? "lkjdfklj" : "mnbcxvnhfn";
+                return variant ? "dummy" : "alternative-dummy";
             }
-            else if (propertyType == typeof(bool))
+            else if (type == typeof(bool))
             {
-                value = variant;
+                return variant;
             }
-            else if (propertyType == typeof(char))
+            else if (type == typeof(char))
             {
-                value = variant ? 'a' : 'b';
+                return variant ? 'a' : 'b';
             }
-            else if (propertyType == typeof(sbyte))
+            else if (type == typeof(sbyte))
             {
-                value = variant ? 12 : 45;
+                return variant ? 12 : 45;
             }
-            else if (propertyType == typeof(byte))
+            else if (type == typeof(byte))
             {
-                value = variant ? 123 : 456;
+                return variant ? 123 : 456;
             }
-            else if (propertyType == typeof(short))
+            else if (type == typeof(short))
             {
-                value = variant ? 1 : -4;
+                return variant ? 1 : -4;
             }
-            else if (propertyType == typeof(ushort))
+            else if (type == typeof(ushort))
             {
-                value = variant ? 1 : 4;
+                return variant ? 1 : 4;
             }
-            else if (propertyType == typeof(int))
+            else if (type == typeof(int))
             {
-                value = variant ? 1234 : -4567;
+                return variant ? 1234 : -4567;
             }
-            else if (propertyType == typeof(uint))
+            else if (type == typeof(uint))
             {
-                value = variant ? 1234 : 4567;
+                return variant ? 1234 : 4567;
             }
-            else if (propertyType == typeof(long))
+            else if (type == typeof(long))
             {
-                value = variant ? 12345L : -45678L;
+                return variant ? 12345L : -45678L;
             }
-            else if (propertyType == typeof(ulong))
+            else if (type == typeof(ulong))
             {
-                value = variant ? 12345L : 45678L;
+                return variant ? 12345L : 45678L;
             }
-            else if (propertyType == typeof(float))
+            else if (type == typeof(float))
             {
-                value = variant ? 23.45F : 678.999F;
+                return variant ? 23.45F : 678.999F;
             }
-            else if (propertyType == typeof(double))
+            else if (type == typeof(double))
             {
-                value = variant ? 23.456 : 678.9999;
+                return variant ? 23.456 : 678.9999;
             }
-            else if (propertyType == typeof(DateTime))
+            else if (type == typeof(DateTime))
             {
-                value = variant ? new DateTime(2022, 3, 31) : new DateTime(1971, 2, 10);
+                return variant ? new DateTime(2022, 3, 31) : new DateTime(1971, 2, 10);
             }
-            else if (propertyType == typeof(DateTimeOffset))
+            else if (type == typeof(DateTimeOffset))
             {
-                value = variant ? new DateTimeOffset(new DateTime(2022, 3, 30)) : new DateTimeOffset(new DateTime(1971, 2, 9));
+                return variant ? new DateTimeOffset(new DateTime(2022, 3, 30)) : new DateTimeOffset(new DateTime(1971, 2, 9));
             }
-            else if (propertyType == typeof(Guid))
+            else if (type == typeof(Guid))
             {
-                value = variant ? new Guid("666507cd-08e4-4a9a-a65f-cba49a2162a7") : new Guid("983fe766-c921-45db-b0f1-55a3c2336d4b");
+                return variant ? new Guid("666507cd-08e4-4a9a-a65f-cba49a2162a7") : new Guid("983fe766-c921-45db-b0f1-55a3c2336d4b");
             }
-            else if (propertyType.IsEnum)
+            else if (type.IsEnum)
             {
-                value = variant ? Enum.GetValues(propertyType).GetValue(0) : Enum.GetValues(propertyType).GetValue(1);
+                return variant ? Enum.GetValues(type).GetValue(0) : Enum.GetValues(type).GetValue(1);
             }
-            else if (propertyType == typeof(Uri))
+            else if (type == typeof(Uri))
             {
-                value = variant ? new Uri("http://abc.com") : new Uri("http://xyz.com");
+                return variant ? new Uri("http://abc.com") : new Uri("http://xyz.com");
             }
             else
             {
                 throw new InvalidOperationException();
             }
-            property.SetValue(instance, value);
         }
 
         private static bool isSimple(Type type)
