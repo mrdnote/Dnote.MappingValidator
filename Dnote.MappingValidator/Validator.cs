@@ -367,7 +367,7 @@ namespace Dnote.MappingValidator.Library
 
             if (type == typeof(string))
             {
-                return variant ? "dummy" : "alternative-dummy";
+                return variant ? "/dummy" : "/alternative-dummy";
             }
             else if (type == typeof(bool))
             {
