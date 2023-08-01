@@ -127,12 +127,20 @@ namespace Dnote.MappingValidator.Library
                     var attribute = property.GetCustomAttributes().OfType<ValidatePropertyMappingAttribute>().First();
                     var expression = property.GetValue(null) as Expression ?? throw new InvalidOperationException();
                     var report = new List<string>();
-                    var validateResult = ValidateExpression(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
-                    if (validateResult == false)
+                    try
+                    {
+                        var validateResult = ValidateExpression(expression, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                        if (validateResult == false)
+                        {
+                            result = false;
+                            invalidExpressionReport?.Add($"{type.FullName}.{property.Name}");
+                            invalidExpressionReport?.AddRange(report);
+                        }
+                    }
+                    catch(Exception ex)
                     {
                         result = false;
-                        invalidExpressionReport?.Add($"{type.FullName}.{property.Name}");
-                        invalidExpressionReport?.AddRange(report);
+                        invalidExpressionReport?.Add($"Validation failed for {type.FullName}.{property.Name}: {ex.Message}");
                     }
                 }
 
@@ -155,12 +163,20 @@ namespace Dnote.MappingValidator.Library
                 {
                     var report = new List<string>();
                     var attribute = function.GetCustomAttributes().OfType<ValidateFunctionMappingAttribute>().First();
-                    var validateResult = validateFunction(function, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
-                    if (validateResult == false)
+                    try
+                    {
+                        var validateResult = validateFunction(function, report, attribute.SkipChildObjects, attribute.ExcludedProperties);
+                        if (validateResult == false)
+                        {
+                            result = false;
+                            invalidExpressionReport?.Add($"{type.FullName}.{function.Name}");
+                            invalidExpressionReport?.AddRange(report);
+                        }
+                    }
+                    catch (Exception ex)
                     {
                         result = false;
-                        invalidExpressionReport?.Add($"{type.FullName}.{function.Name}");
-                        invalidExpressionReport?.AddRange(report);
+                        invalidExpressionReport?.Add($"Validation failed for {type.FullName}.{function.Name}: {ex.Message}");
                     }
                 }
             }
@@ -259,13 +275,13 @@ namespace Dnote.MappingValidator.Library
             fillWithSampleValues(inputObject, excludedProperties, null, false, null, 0);
         }
 
-        private static void fillWithSampleValues(object inputObject, IEnumerable<string>? excludedProperties, string? unmappedPrefix, bool variant, 
-            IDictionary<Type, object>? instantiatedObjects = null, int level = 0)
+        private static void fillWithSampleValues(object inputObject, IEnumerable<string>? excludedProperties, string? unmappedPrefix, bool variant,
+            IDictionary<(Type, int), object>? instantiatedObjects = null, int level = 0)
         {
             _ = inputObject ?? throw new ArgumentNullException(nameof(inputObject));
 
             // Another safety: only instantiate/fill each class type once
-            instantiatedObjects ??= new Dictionary<Type, object>();
+            instantiatedObjects ??= new Dictionary<(Type, int), object>();
 
             var properties = inputObject.GetType().GetProperties();
 
@@ -333,20 +349,20 @@ namespace Dnote.MappingValidator.Library
         }
 
         private static object? getOrCreateAndFillInstance(Type propertyType, IEnumerable<string>? excludedProperties, string? unmappedPrefix, 
-            bool variant, IDictionary<Type, object> instantiatedObjects, int level)
+            bool variant, IDictionary<(Type, int), object> instantiatedObjects, int level)
         {
-            if (level > 50)
+            if (level > 10)
             {
                 return null;
             }
 
-            if (instantiatedObjects.ContainsKey(propertyType))
+            if (instantiatedObjects.ContainsKey((propertyType, level)))
             {
-                return instantiatedObjects[propertyType];
+                return instantiatedObjects[(propertyType, level)];
             }
 
             var instance = Activator.CreateInstance(propertyType) ?? throw new InvalidOperationException();
-            instantiatedObjects[propertyType] = instance;
+            instantiatedObjects[(propertyType, level)] = instance;
             fillWithSampleValues(instance, excludedProperties, unmappedPrefix, variant, instantiatedObjects, level + 1);
             return instance;
         }
