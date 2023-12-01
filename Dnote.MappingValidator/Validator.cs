@@ -242,20 +242,24 @@ namespace Dnote.MappingValidator.Library
                             var list1 = value1 as IEnumerable ?? throw new InvalidOperationException();
                             var list2 = value2 as IEnumerable ?? throw new InvalidOperationException();
                             var enumerator = list1.GetEnumerator();
-                            enumerator.MoveNext();
-                            var item1 = enumerator.Current;
-                            var enumerator2 = list2.GetEnumerator();
-                            enumerator2.MoveNext();
-                            var item2 = enumerator2.Current;
+                            if (enumerator.MoveNext())
+                            {
+                                var item1 = enumerator.Current;
+                                var enumerator2 = list2.GetEnumerator();
+                                if (enumerator2.MoveNext())
+                                {
+                                    var item2 = enumerator2.Current;
 
-                            if (item1 == null || item2 == null)
-                            {
-                                unmappedProperties.Add($"- {concat(unmappedPrefix, property.Name)}");
-                            }
-                            else
-                            {
-                                checkIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties, 
-                                    concat(unmappedPrefix, property.Name));
+                                    if (item1 == null || item2 == null)
+                                    {
+                                        unmappedProperties.Add($"- {concat(unmappedPrefix, property.Name)}");
+                                    }
+                                    else
+                                    {
+                                        checkIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties,
+                                            concat(unmappedPrefix, property.Name));
+                                    }
+                                }
                             }
                         }
                     }
