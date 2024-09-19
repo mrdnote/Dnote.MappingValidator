@@ -457,7 +457,7 @@ namespace Dnote.MappingValidator.Library
             }
             else if (type.IsEnum)
             {
-                return variant ? Enum.GetValues(type).GetValue(0) : Enum.GetValues(type).GetValue(1);
+                return variant ? Enum.GetValues(type).GetValue(0) : Enum.GetValues(type).Length > 1 ? Enum.GetValues(type).GetValue(1) : Enum.GetValues(type).GetValue(0);
             }
             else if (type == typeof(Uri))
             {
