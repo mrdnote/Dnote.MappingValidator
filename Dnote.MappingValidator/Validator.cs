@@ -371,10 +371,15 @@ namespace Dnote.MappingValidator.Library
                 return instantiatedObjects[(propertyType, level)];
             }
 
-            var instance = Activator.CreateInstance(propertyType) ?? throw new InvalidOperationException();
-            instantiatedObjects[(propertyType, level)] = instance;
-            fillWithSampleValues(instance, excludedProperties, unmappedPrefix, variant, instantiatedObjects, level + 1);
-            return instance;
+            if (!propertyType.IsAbstract)
+            {
+                var instance = Activator.CreateInstance(propertyType) ?? throw new InvalidOperationException();
+                instantiatedObjects[(propertyType, level)] = instance;
+                fillWithSampleValues(instance, excludedProperties, unmappedPrefix, variant, instantiatedObjects, level + 1);
+                return instance;
+            }
+
+            return null;
         }
 
         private static void fillProperty(PropertyInfo property, object instance, bool variant)
