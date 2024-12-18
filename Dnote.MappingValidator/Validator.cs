@@ -46,7 +46,7 @@ namespace Dnote.MappingValidator.Library
 
             if (parameters.Length < 2)
             {
-                throw new InvalidOperationException($"Validated procedures must have 2 or more parameters! Method: {method}");
+                throw new InvalidOperationException($"Validated procedures must have 2 or more parameters! Method: {method.DeclaringType.FullName}.{method.Name}");
             }
 
             var sourceType = parameters[0].ParameterType;
