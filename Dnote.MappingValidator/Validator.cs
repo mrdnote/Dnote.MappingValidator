@@ -18,18 +18,36 @@ namespace Dnote.MappingValidator.Library
 
             var lambdaExpression = expression as LambdaExpression ?? throw new InvalidOperationException();
             var func = lambdaExpression.Compile();
-
             var input = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
             fillWithSampleValues(input, excludedProperties, null, false);
-            var output = func.DynamicInvoke(input) ?? throw new InvalidOperationException();
+            var parameters = new List<object?> { input };
+            addDefaultLambdaExpressionParameters(parameters, lambdaExpression);
+            var output = func.DynamicInvoke(parameters.ToArray()) ?? throw new InvalidOperationException();
 
             var input2 = Activator.CreateInstance(lambdaExpression.Parameters[0].Type) ?? throw new InvalidOperationException();
             fillWithSampleValues(input2, excludedProperties, null, true);
-            var output2 = func.DynamicInvoke(input2) ?? throw new InvalidOperationException();
+            var parameters2 = new List<object?> { input2 };
+            addDefaultLambdaExpressionParameters(parameters2, lambdaExpression);
+            var output2 = func.DynamicInvoke(parameters2.ToArray()) ?? throw new InvalidOperationException();
 
             checkIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
 
             return !report.Any();
+        }
+
+        private static void addDefaultLambdaExpressionParameters(List<object?> parameters, LambdaExpression lambdaExpression)
+        {
+            foreach (var parameter in lambdaExpression.Parameters.Skip(1))
+            {
+                if (parameter.Type.IsValueType)
+                {
+                    parameters.Add(Activator.CreateInstance(parameter.Type));
+                }
+                else
+                {
+                    parameters.Add(null);
+                }
+            }
         }
 
         public static bool ValidateProcedure(Delegate method, List<string>? report, bool skipChildObjects, params string[] excludedProperties)
