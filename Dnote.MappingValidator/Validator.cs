@@ -30,7 +30,7 @@ namespace Dnote.MappingValidator.Library
             addDefaultLambdaExpressionParameters(parameters2, lambdaExpression);
             var output2 = func.DynamicInvoke(parameters2.ToArray()) ?? throw new InvalidOperationException();
 
-            checkIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(output, output2, skipChildObjects, excludedProperties, report, null, null);
 
             return !report.Any();
         }
@@ -86,15 +86,10 @@ namespace Dnote.MappingValidator.Library
             fillWithSampleValues(source2, excludedProperties, null, true);
 
             var dest2 = Activator.CreateInstance(destType) ?? throw new InvalidOperationException();
-
-            var paramList2 = new List<object?> { source2, dest2 };
-            for (int i = 2; i < parameters.Count(); i++)
-            {
-                paramList2.Add(null);
-            }
+            var paramList2 = getInvocationParameters(parameters, new List<object?> { source2, dest2 }, out var validatorConfiguration);
             method.Invoke(null, paramList2.ToArray());
 
-            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null, validatorConfiguration);
 
             return !report.Any();
         }        
@@ -125,16 +120,38 @@ namespace Dnote.MappingValidator.Library
             var source2 = Activator.CreateInstance(sourceType) ?? throw new InvalidOperationException();
             fillWithSampleValues(source2, excludedProperties, null, true);
 
-            var paramList2 = new List<object?> { source2 };
-            for (int i = 1; i < parameters.Count(); i++)
-            {
-                paramList2.Add(null);
-            }
+            var paramList2 = getInvocationParameters(parameters, new List<object?> { source2 }, out var validatorConfiguration);
             var dest2 = method.Invoke(null, paramList2.ToArray()) ?? throw new InvalidOperationException();
 
-            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null);
+            checkIfAllPropertiesAreChanged(dest1, dest2, skipChildObjects, excludedProperties, report, null, validatorConfiguration);
 
             return !report.Any();
+        }
+
+        private static List<object?> getInvocationParameters(ParameterInfo[] parameters, List<object?> baseParameters, 
+            out ValidatorConfigurationBase? validatorConfiguration)
+        {
+            var result = new List<object?>(baseParameters);
+            validatorConfiguration = null;
+
+            for (int i = baseParameters.Count; i < parameters.Count(); i++)
+            {
+                var parameterType = parameters[i].ParameterType;
+                if (parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(ValidatorConfiguration<>))
+                {
+                    // Dynamically create a ValidatorConfiguration instance for the generic type
+                    var genericType = parameterType.GetGenericArguments()[0];
+                    var validatorConfigurationType = typeof(ValidatorConfiguration<>).MakeGenericType(genericType);
+                    validatorConfiguration = Activator.CreateInstance(validatorConfigurationType) as ValidatorConfigurationBase;
+                    result.Add(validatorConfiguration);
+                }
+                else
+                {
+                    result.Add(null);
+                }
+            }
+
+            return result;
         }
 
         public static bool ValidateAssembly(Assembly assembly, List<string>? invalidExpressionReport = null)
@@ -209,7 +226,8 @@ namespace Dnote.MappingValidator.Library
         }
 
         private static void checkIfAllPropertiesAreChanged(object output, object output2, bool skipChildObjects, 
-            IEnumerable<string>? excludedProperties, List<string> unmappedProperties, string? unmappedPrefix)
+            IEnumerable<string>? excludedProperties, List<string> unmappedProperties, string? unmappedPrefix, 
+            ValidatorConfigurationBase? validatorConfiguration)
         {
             Debug.Assert(output.GetType() == output2.GetType());
 
@@ -220,7 +238,16 @@ namespace Dnote.MappingValidator.Library
                 properties = properties.Where(p => !excludedProperties.Any(pp => pp == concat(unmappedPrefix, p.Name))).ToArray();
             }
 
-            if (skipChildObjects)
+            if (validatorConfiguration != null)
+            {
+                var validatorConfigType = validatorConfiguration.GetType();
+                var ignoredPropertiesField = validatorConfigType.GetField("IgnoredProperties");
+                var ignoredProperties = ignoredPropertiesField.GetValue(validatorConfiguration) as HashSet<string>
+                    ?? throw new InvalidOperationException($"Method 'IgnoredProperties' not found in {validatorConfigType.FullName}");
+                properties = properties.Where(p => !ignoredProperties.Any(pp => pp == concat(unmappedPrefix, p.Name))).ToArray();
+            }
+
+            if (skipChildObjects || validatorConfiguration?.IgnoreChildObjectsValue == true)
             {
                 properties = properties.Where(p => isSimple(p.PropertyType)).ToArray();
             }
@@ -275,7 +302,7 @@ namespace Dnote.MappingValidator.Library
                                     else
                                     {
                                         checkIfAllPropertiesAreChanged(item1, item2, skipChildObjects, excludedProperties, unmappedProperties,
-                                            concat(unmappedPrefix, property.Name));
+                                            concat(unmappedPrefix, property.Name), null);
                                     }
                                 }
                             }

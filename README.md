@@ -252,3 +252,53 @@ public void Validators_work_for_assembly()
     Assert.IsTrue(isValid);
 }
 ```
+
+## Skipping properties
+
+If you want to skip properties from being checked in the mapping, because, for example, they are calculated during the mapping, you can do so by 
+specifying them as parameters of the `ValidatePropertyMapping` attribute:
+
+```C#
+[ValidatePropertyMapping(false, "Age")]
+public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
+{
+    // ...
+}
+```
+
+Of course, it's better to use the `nameof` operator to avoid issues when renaming properties:
+```C#
+[ValidatePropertyMapping(false, nameof(MapPersonViewModel.Age))]
+public static Expression<Func<PersonViewModel, PersonDto>> MapPersonViewModel
+{
+    // ...
+}
+```
+
+The first, boolean, parameter of the attribute indicates whether child objects and lists need to be skipped during validation.
+
+Another way to skip properties is by specifying them in a configuration object that is passed as a parameter to the mapping function of method:
+
+```C#
+[ValidateFunctionMapping]
+public static PersonViewModel MapPersonViewModel(PersonDto source, ValidationConfiguration<PersonViewModel>? validationConfiguration = null)
+{
+    validationConfiguration?
+        .Ignore(x => x.Age)
+        .IgnoreChildObjects();
+
+    // ...
+}
+```
+
+This has a big advantage over the attribute approach, because the properties are not specified by name but by expression, which means that if the 
+property is renamed, the validation will still work. If you use the `nameof` operator in the attribute, the name is checked at compile time as well,
+but the expression approach is more robust and less error-prone.
+
+You can chain multiple `Ignore()` calls to skip multiple properties, and you can also use `IgnoreChildObjects()` to skip child objects and lists during 
+validation.
+
+The configuration parameter should be optional, nullable with a default value of `null`. This allows the mapping method to be called from your own
+code. The validation library will automatically provide a `ValidationConfiguration` object, so you don't have to worry about that.
+
+The `ValidationConfiguration` parameter is only supported for functional and procedural mappings, not for expression mappings.
