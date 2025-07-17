@@ -281,9 +281,9 @@ Another way to skip properties is by specifying them in a configuration object t
 
 ```C#
 [ValidateFunctionMapping]
-public static PersonViewModel MapPersonViewModel(PersonDto source, ValidationConfiguration<PersonViewModel>? validationConfiguration = null)
+public static PersonViewModel MapPersonViewModel(PersonDto source, ValidatorConfiguration<PersonViewModel>? validatorConfiguration = null)
 {
-    validationConfiguration?
+    validatorConfiguration?
         .Ignore(x => x.Age)
         .IgnoreChildObjects();
 
@@ -299,6 +299,6 @@ You can chain multiple `Ignore()` calls to skip multiple properties, and you can
 validation.
 
 The configuration parameter should be optional, nullable with a default value of `null`. This allows the mapping method to be called from your own
-code. The validation library will automatically provide a `ValidationConfiguration` object, so you don't have to worry about that.
+code. The validation library will automatically provide a `ValidatorConfiguration` object, so you don't have to worry about that.
 
-The `ValidationConfiguration` parameter is only supported for functional and procedural mappings, not for expression mappings.
+The `ValidatorConfiguration` parameter is only supported for functional and procedural mappings, not for expression mappings.
