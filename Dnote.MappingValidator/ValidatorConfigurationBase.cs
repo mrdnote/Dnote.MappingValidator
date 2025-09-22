@@ -4,7 +4,9 @@ namespace Dnote.MappingValidator
 {
     public class ValidatorConfigurationBase
     {
-        public readonly HashSet<string> IgnoredProperties = new HashSet<string>();
+        internal readonly HashSet<string> IgnoredPropertiesValue = new HashSet<string>();
+
+        public HashSet<string> IgnoredProperties() => IgnoredPropertiesValue;
 
         internal bool IgnoreChildObjectsValue;
 

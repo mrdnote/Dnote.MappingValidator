@@ -241,9 +241,7 @@ namespace Dnote.MappingValidator.Library
             if (validatorConfiguration != null)
             {
                 var validatorConfigType = validatorConfiguration.GetType();
-                var ignoredPropertiesField = validatorConfigType.GetField("IgnoredProperties");
-                var ignoredProperties = ignoredPropertiesField.GetValue(validatorConfiguration) as HashSet<string>
-                    ?? throw new InvalidOperationException($"Method 'IgnoredProperties' not found in {validatorConfigType.FullName}");
+                var ignoredProperties = validatorConfiguration.IgnoredPropertiesValue;
                 properties = properties.Where(p => !ignoredProperties.Any(pp => pp == concat(unmappedPrefix, p.Name))).ToArray();
             }
 
@@ -338,7 +336,7 @@ namespace Dnote.MappingValidator.Library
             // Another safety: only instantiate/fill each class type once
             instantiatedObjects ??= new Dictionary<(Type, int), object>();
 
-            var properties = inputObject.GetType().GetProperties();
+            var properties = inputObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (excludedProperties != null)
             {

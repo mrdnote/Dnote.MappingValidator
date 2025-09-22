@@ -11,7 +11,7 @@ namespace Dnote.MappingValidator
         public ValidatorConfiguration<T> Ignore<TProperty>(Expression<Func<T, TProperty>> propertySelector)
         {
             var propertyName = getPropertyName(propertySelector);
-            IgnoredProperties.Add(propertyName);
+            IgnoredPropertiesValue.Add(propertyName);
             return this;
         }
 
