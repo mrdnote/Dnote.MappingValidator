@@ -491,6 +491,10 @@ namespace Dnote.MappingValidator.Library
             {
                 return variant ? 23.456 : 678.9999;
             }
+            else if (type == typeof(decimal))
+            {
+                return variant ? 23.456m : 678.9999m;
+            }
             else if (type == typeof(DateTime))
             {
                 return variant ? new DateTime(2022, 3, 31) : new DateTime(1971, 2, 10);
